@@ -6,7 +6,7 @@
   "engines": { "node": "24.x" },
   "scripts": {
     "dev": "concurrently \"vite\" \"tsx watch src/server/index.ts\"",
-    "build": "tsc -p tsconfig.server.json && vite build && node scripts/write-vercel-entry.mjs",
+    "build": "tsc -p tsconfig.server.json && vite build",
     "start": "node dist/server/index.js",
     "test": "vitest run",
     "test:watch": "vitest"
