@@ -61,22 +61,23 @@ The response contains one result per unique normalized address plus category cou
 - No outbound SMTP connection is made and the application never reaches an email `DATA` stage.
 - DNS errors are treated as `unknown`, never as proof an address is invalid.
 
-## Render deployment
+## Single-project Vercel deployment
 
 GitHub repository: https://github.com/Jude-00-05/shieldnex-email-checker
 
-Use the public GitHub repository to create a Render Free Web Service, or select **Blueprint** so Render reads the included `render.yaml`.
+Create one Vercel project from the public GitHub repository. The project contains one Express Function and the Vite static output, so the browser and API use one origin.
 
-Manual service settings:
+Manual project settings:
 
-- Build command: `npm ci && npm run build`
-- Start command: `npm start`
-- Health check path: `/health`
-- Runtime: Node.js 20.18+ (the supported range is pinned in `package.json`)
-- Required user-provided environment variables: none
+- Framework preset: use Vercel's Express detection (the recognized `src/index.ts` entry point); do not create a second frontend or backend project.
+- Build command: `npm run build` (Vercel runs the install step from `package-lock.json`).
+- Output directory: `public`.
+- Required user-provided environment variables: none.
 
-The server binds to `0.0.0.0` and uses Render's `PORT` value automatically. The build places the frontend in `dist/client`; the production Express server serves that directory and the API from the same service. Do not configure a separate frontend service or add SMTP credentials.
+Vercel serves the generated `public/**` files through its CDN. `express.static()` is used only for local production testing because Vercel does not serve static assets through that middleware. The Express Function exports from `src/index.ts`; `/api/check` and `/health` remain Express routes. `vercel.json` rewrites browser routes to the generated `index.html` while leaving `/api/*`, `/health`, and `/assets/*` available to their intended handlers.
 
-After deployment, open the service URL, request `/health`, and run one valid-domain and one malformed-address check from the live UI. A Free service can take about a minute to wake after inactivity.
+The frontend calls `/api/check` with a relative URL, so no API URL environment variable is needed. Vercel supplies the function runtime and does not require a `PORT` setting for the exported app.
 
-Render Free services can cold-start after inactivity. The live application URL should be added here after verification.
+Each DNS operation has a three-second timeout and the batch worker limit is ten addresses. The maximum 100-address batch therefore has a roughly 30-second timeout-bound worst case, within current Vercel Hobby function limits; actual DNS behavior and duration must be checked after deployment. Vercel Fluid Compute currently allows 300 seconds on Hobby, while non-Fluid Hobby functions allow up to 60 seconds.
+
+After deployment, open the project URL, request `/health`, and run one valid-domain and one malformed-address check from the live UI. Confirm that static assets load, `/api/check` returns JSON, and DNS failures appear as `unknown` rather than deliverable.

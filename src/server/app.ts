@@ -18,7 +18,7 @@ export function createApp(resolver: DnsResolver = systemResolver) {
     if (!req.body || typeof req.body.input !== 'string') return res.status(400).json({ error: 'Provide an input string containing email addresses.' });
     try {
       const { addresses, duplicatesRemoved } = splitInput(req.body.input);
-      const results = await mapWithConcurrency(addresses, 5, (email) => checkOne(email, resolver));
+      const results = await mapWithConcurrency(addresses, 10, (email) => checkOne(email, resolver));
       const summary = { likely_deliverable: 0, likely_bounce: 0, unknown: 0, duplicatesRemoved };
       for (const result of results) summary[result.status] += 1;
       return res.json({ results, summary } satisfies CheckResponse);
@@ -33,12 +33,17 @@ export function createApp(resolver: DnsResolver = systemResolver) {
     return res.status(400).json({ error: 'Request body must be valid JSON.' });
   });
   const serverDir = path.dirname(fileURLToPath(import.meta.url));
-  const clientDir = path.resolve(serverDir, '../client');
-  app.use(express.static(clientDir));
-  app.use((req, res) => {
-    if (req.method === 'GET' && !req.path.startsWith('/api/')) return res.sendFile(path.join(clientDir, 'index.html'));
-    return res.status(404).json({ error: 'Not found.' });
-  });
+  const publicDir = path.resolve(serverDir, '../../public');
+  const runningOnVercel = Boolean(process.env.VERCEL);
+  if (!runningOnVercel) {
+    app.use(express.static(publicDir));
+    app.use((req, res) => {
+      if (req.method === 'GET' && !req.path.startsWith('/api/')) return res.sendFile(path.join(publicDir, 'index.html'));
+      return res.status(404).json({ error: 'Not found.' });
+    });
+  } else {
+    app.use((_req, res) => res.status(404).json({ error: 'Not found.' }));
+  }
   return app;
 }
 
