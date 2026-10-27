@@ -26,7 +26,7 @@ No database, authentication system, external verification API, or SMTP client is
 
 ## Local setup
 
-Requires Node.js 20.18 or newer.
+Requires Node.js 24.x LTS for local verification and deployment. The project pins `24.x` in `package.json`; Vercel supplies the latest patch release in that major line.
 
 ```bash
 npm install
@@ -69,12 +69,12 @@ Create one Vercel project from the public GitHub repository. The project contain
 
 Manual project settings:
 
-- Framework preset: use Vercel's Express detection (the recognized `src/index.ts` entry point); do not create a second frontend or backend project.
+- Framework preset: use Vercel's Express detection (the recognized `src/index.ts` entry point); do not create a second frontend or backend project. Vercel's Express route introspection handles `/api/check` and `/health`; no API rewrite is required.
 - Build command: `npm run build` (Vercel runs the install step from `package-lock.json`).
 - Output directory: `public`.
 - Required user-provided environment variables: none.
 
-Vercel serves the generated `public/**` files through its CDN. `express.static()` is used only for local production testing because Vercel does not serve static assets through that middleware. The Express Function exports from `src/index.ts`; `/api/check` and `/health` remain Express routes. `vercel.json` rewrites browser routes to the generated `index.html` while leaving `/api/*`, `/health`, and `/assets/*` available to their intended handlers.
+Vercel serves the generated `public/**` files through its CDN. `express.static()` is used only for local production testing because Vercel does not serve static assets through that middleware. The Express Function exports from `src/index.ts`; `/api/check` and `/health` remain Express routes. `vercel.json` only declares the Vite build command and its static output directory, avoiding rewrites that can intercept Express routes.
 
 The frontend calls `/api/check` with a relative URL, so no API URL environment variable is needed. Vercel supplies the function runtime and does not require a `PORT` setting for the exported app.
 
