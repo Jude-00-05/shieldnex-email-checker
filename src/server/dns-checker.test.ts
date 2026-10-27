@@ -28,4 +28,21 @@ describe('DNS classification', () => {
     const result = await checkDns(address, resolver({ resolveMx: () => fail('SERVFAIL') }));
     expect(result).toMatchObject({ status: 'unknown', checks: { routing: 'dns_unavailable' } });
   });
+  it.each(['REFUSED', 'ETIMEOUT', 'EAI_AGAIN'])('keeps %s unknown', async (code) => {
+    const result = await checkDns(address, resolver({ resolveMx: () => fail(code) }));
+    expect(result).toMatchObject({ status: 'unknown', checks: { routing: 'dns_unavailable' } });
+  });
+  it.each(['ENOTFOUND', 'NXDOMAIN'])('classifies confirmed %s as likely bounce', async (code) => {
+    const result = await checkDns(address, resolver({ resolveMx: () => fail(code) }));
+    expect(result).toMatchObject({ status: 'likely_bounce', checks: { routing: 'no_routing' } });
+  });
+  it('does not call fallback records for a conclusive NXDOMAIN', async () => {
+    let fallbackCalled = false;
+    const result = await checkDns(address, resolver({
+      resolveMx: () => fail('NXDOMAIN'),
+      resolve4: async () => { fallbackCalled = true; return ['192.0.2.1']; }
+    }));
+    expect(result.status).toBe('likely_bounce');
+    expect(fallbackCalled).toBe(false);
+  });
 });
