@@ -13,7 +13,7 @@ A DNS-only bulk email routing checker built for the ShieldNex Aerospace internsh
 
 ## Important limitations
 
-This application does **not** verify that a specific mailbox exists, and it does **not** guarantee delivery. MX records only establish that a domain appears capable of accepting mail. The deployed Render Free service is intentionally DNS-only: Render Free blocks outbound SMTP ports, so the app never attempts SMTP recipient probing and never sends email.
+This application does **not** verify that a specific mailbox exists, and it does **not** guarantee delivery. MX records only establish that a domain appears capable of accepting mail. The deployed Vercel Function is intentionally DNS-only: it never attempts SMTP recipient probing and never sends email.
 
 ## Architecture
 
@@ -52,7 +52,7 @@ Content-Type: application/json
 { "input": "alex@example.com\ninvalid@@example" }
 ```
 
-The response contains one result per unique normalized address plus category counts and `duplicatesRemoved`. Input is limited to 20 KB and 100 unique addresses. The service limits callers to 30 batch requests per 10 minutes, limits DNS work to five concurrent addresses, and applies a three-second DNS-operation timeout.
+The response contains one result per unique normalized address plus category counts and `duplicatesRemoved`. Input is limited to 20 KB and 100 unique addresses. The service limits callers to 30 batch requests per 10 minutes, limits DNS work to ten concurrent addresses, and applies a three-second DNS-operation timeout.
 
 ## Privacy and safety
 
