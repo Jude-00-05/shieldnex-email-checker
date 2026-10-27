@@ -65,9 +65,18 @@ The response contains one result per unique normalized address plus category cou
 
 GitHub repository: https://github.com/Jude-00-05/shieldnex-email-checker
 
-1. Push this repository to GitHub.
-2. In Render, create a Blueprint or Web Service from the repository.
-3. Use the included `render.yaml`, or set build command `npm ci && npm run build`, start command `npm start`, and health check `/health`.
-4. Verify the deployed URL and `/health` endpoint, then test a valid MX domain and an invalid address from the live UI.
+Use the public GitHub repository to create a Render Free Web Service, or select **Blueprint** so Render reads the included `render.yaml`.
+
+Manual service settings:
+
+- Build command: `npm ci && npm run build`
+- Start command: `npm start`
+- Health check path: `/health`
+- Runtime: Node.js 20.18+ (the supported range is pinned in `package.json`)
+- Required user-provided environment variables: none
+
+The server binds to `0.0.0.0` and uses Render's `PORT` value automatically. The build places the frontend in `dist/client`; the production Express server serves that directory and the API from the same service. Do not configure a separate frontend service or add SMTP credentials.
+
+After deployment, open the service URL, request `/health`, and run one valid-domain and one malformed-address check from the live UI. A Free service can take about a minute to wake after inactivity.
 
 Render Free services can cold-start after inactivity. The live application URL should be added here after verification.
