@@ -63,6 +63,8 @@ The response contains one result per unique normalized address plus category cou
 
 ## Render deployment
 
+GitHub repository: https://github.com/Jude-00-05/shieldnex-email-checker
+
 1. Push this repository to GitHub.
 2. In Render, create a Blueprint or Web Service from the repository.
 3. Use the included `render.yaml`, or set build command `npm ci && npm run build`, start command `npm start`, and health check `/health`.
