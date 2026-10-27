@@ -76,6 +76,8 @@ Manual project settings:
 
 Vercel serves the generated `public/**` files through its CDN. `express.static()` is used only for local production testing because Vercel does not serve static assets through that middleware. The Express Function exports from the recognized `src/index.ts` entrypoint; `/api/check` and `/health` remain Express routes. `vercel.json` pins the Express framework and only overrides the build command needed to run the Vite build; it contains no output-directory override or rewrites.
 
+The Vite production output in `public/**` is intentionally tracked because native Express deployments discover the Function from source while Vercel's CDN serves source `public/**` files. Run `npm run build` before committing frontend changes so the tracked HTML and hashed assets stay synchronized.
+
 The frontend calls `/api/check` with a relative URL, so no API URL environment variable is needed. Vercel supplies the function runtime and does not require a `PORT` setting for the exported app.
 
 Each DNS operation has a three-second timeout and the batch worker limit is ten addresses. The maximum 100-address batch therefore has a roughly 30-second timeout-bound worst case, within current Vercel Hobby function limits; actual DNS behavior and duration must be checked after deployment. Vercel Fluid Compute currently allows 300 seconds on Hobby, while non-Fluid Hobby functions allow up to 60 seconds.
