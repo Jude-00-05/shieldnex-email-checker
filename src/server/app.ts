@@ -33,8 +33,10 @@ export function createApp(resolver: DnsResolver = systemResolver) {
     return res.status(400).json({ error: 'Request body must be valid JSON.' });
   });
   const serverDir = path.dirname(fileURLToPath(import.meta.url));
-  const publicDir = path.resolve(serverDir, '../../public');
   const runningOnVercel = Boolean(process.env.VERCEL);
+  const publicDir = runningOnVercel
+    ? path.resolve(process.cwd(), 'public')
+    : path.resolve(serverDir, '../../public');
   if (!runningOnVercel) {
     app.use(express.static(publicDir));
     app.use((req, res) => {
@@ -42,6 +44,7 @@ export function createApp(resolver: DnsResolver = systemResolver) {
       return res.status(404).json({ error: 'Not found.' });
     });
   } else {
+    app.get('/', (_req, res) => res.sendFile(path.join(publicDir, 'index.html')));
     app.use((_req, res) => res.status(404).json({ error: 'Not found.' }));
   }
   return app;

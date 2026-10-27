@@ -35,4 +35,17 @@ describe('API', () => {
     const response = await request(createApp(resolver)).get('/health');
     expect(response.body).toEqual({ ok: true, mode: 'dns-only' });
   });
+  it('serves the frontend shell from the Vercel root route', async () => {
+    const previousVercel = process.env.VERCEL;
+    process.env.VERCEL = '1';
+    try {
+      const response = await request(createApp(resolver)).get('/');
+      expect(response.status).toBe(200);
+      expect(response.headers['content-type']).toContain('text/html');
+      expect(response.text).toContain('id="root"');
+    } finally {
+      if (previousVercel === undefined) delete process.env.VERCEL;
+      else process.env.VERCEL = previousVercel;
+    }
+  });
 });

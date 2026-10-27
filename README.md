@@ -74,7 +74,7 @@ Manual project settings:
 - Output directory: blank/unset (`vercel.json` uses `null` to clear any dashboard override). Do not set it to `public`; native Express discovery uses the source entrypoint while Vercel serves `public/**` through its CDN.
 - Required user-provided environment variables: none.
 
-Vercel serves the generated `public/**` files through its CDN. `express.static()` is used only for local production testing because Vercel does not serve static assets through that middleware. The Express Function exports from the recognized `src/index.ts` entrypoint; `/api/check` and `/health` remain Express routes. `vercel.json` pins the Express framework, runs the Vite build, clears any output-directory override, and rewrites only `/` to the static `/index.html`; API and health paths are not rewritten.
+Vercel serves the generated `public/**` assets through its CDN. The Express Function explicitly serves the tracked `public/index.html` for `/`; `vercel.json` includes `public/**` in that Function for this root response. `express.static()` is used only for local production testing because Vercel does not serve assets through that middleware. `/api/check` and `/health` remain unchanged Express routes, with no rewrites.
 
 The Vite production output in `public/**` is intentionally tracked because native Express deployments discover the Function from source while Vercel's CDN serves source `public/**` files. Run `npm run build` before committing frontend changes so the tracked HTML and hashed assets stay synchronized.
 

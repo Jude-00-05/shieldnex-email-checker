@@ -3,7 +3,9 @@
   "framework": "express",
   "buildCommand": "npm run build",
   "outputDirectory": null,
-  "rewrites": [
-    { "source": "/", "destination": "/index.html" }
-  ]
+  "functions": {
+    "src/index.ts": {
+      "includeFiles": "public/**"
+    }
+  }
 }
