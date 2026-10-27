@@ -69,12 +69,12 @@ Create one Vercel project from the public GitHub repository. The project contain
 
 Manual project settings:
 
-- Framework preset: use Vercel's Express detection (the recognized `src/index.ts` entry point); do not create a second frontend or backend project. Vercel's Express route introspection handles `/api/check` and `/health`; no API rewrite is required.
+- Framework preset: `Express` (the repository's `vercel.json` pins this supported framework slug). Do not create a second frontend or backend project. Vercel's Express route introspection handles `/api/check` and `/health`; no API rewrite is required.
 - Build command: `npm run build` (Vercel runs the install step from `package-lock.json`).
-- Output directory: `public`.
+- Output directory: leave blank/default; native Express deployment serves generated `public/**` assets through Vercel's CDN.
 - Required user-provided environment variables: none.
 
-Vercel serves the generated `public/**` files through its CDN. `express.static()` is used only for local production testing because Vercel does not serve static assets through that middleware. The Express Function exports from `src/index.ts`; `/api/check` and `/health` remain Express routes. `vercel.json` only declares the Vite build command and its static output directory, avoiding rewrites that can intercept Express routes.
+Vercel serves the generated `public/**` files through its CDN. `express.static()` is used only for local production testing because Vercel does not serve static assets through that middleware. The Express Function exports from `src/index.ts`; `/api/check` and `/health` remain Express routes. `vercel.json` pins the Express framework and only overrides the build command needed to run the Vite build; it contains no rewrites or output-directory override.
 
 The frontend calls `/api/check` with a relative URL, so no API URL environment variable is needed. Vercel supplies the function runtime and does not require a `PORT` setting for the exported app.
 
